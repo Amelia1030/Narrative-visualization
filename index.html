@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"
+        integrity="sha512-iBAeBWWWFb8HqSBcrqcz98iIpuVH1la39dEYHtyQ/pGpeCQTQVvLJOWAuhv2Q7JSHp9k7hWA7sGxU3hHJe+tFg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Document</title>
+    <style>
+        #container {
+            margin: auto;
+        }
+
+        #menu {
+            width: 185px;
+            height: 50px;
+            position: absolute;
+            top: 760px;
+            left: 50%;
+            transform: translate(-50%, 0);
+        }
+
+        .page_number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+
+        .page_number:hover {
+            background-color: bisque;
+        }
+
+        #menu span {
+            cursor: pointer;
+        }
+
+        #menu span:hover {
+            text-decoration: underline;
+        }
+
+        #container {
+            width: 900px;
+            height: 750px;
+            overflow: hidden;
+        }
+
+        #wraps {
+            width: 400%;
+            height: 100%;
+            display: flex;
+            position: relative;
+            transition: left 0.3s;
+        }
+
+        .chart {
+            width: 25%;
+            height: 100%;
+        }
+
+        .now {
+            background-color: #ccc;
+        }
+
+        .now:hover {
+            background-color: #ccc;
+        }
+
+        h4 {
+            margin: 10px 0 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu">
+        <span id="prev" onclick="prev()">prev</span>
+        <div class="page_number now" p onclick="toPage(1)">1</div>
+        <div class="page_number" onclick="toPage(2)">2</div>
+        <div class="page_number" onclick="toPage(3)">3</div>
+        <span id="next" onclick="next()">next</span>
+    </div>
+    <div id="container">
+        <div id="wraps">
+            <div id="chart1" class="chart">
+                <svg></svg>
+                <div>
+                    <h4>
+                        WHAT DOES IT MEAN?
+                    </h4>
+                    All the four stock are experiencing similar industry trend: Recovering from the price drop
+                    duringandemic
+                    <br />
+                    Rank 1st: JNJ
+                    <br />
+                    Rank 2nd: MRK
+                    <br />
+                    BMY and PFE are getting close
+                    <h4>
+                        WHAT TO EXPLORE NEXT?
+                    </h4>
+                    The details regarding the leverage structure of each company for the constant years are provided in
+                    the next slide.
+                    <br/>
+                    <br/>
+                    <span style="color: red;">click on the number if you want to go to the other slide page</span>
+                </div>
+            </div>
+            <div id="chart2" class="chart">
+                <svg></svg>
+                <div>
+                    <h4>
+                        WHAT DOES IT MEAN?
+                    </h4>
+                    The debt ratio is a measure of how much of a company's assets are financed with debt.
+                    <br />
+                    Higher-leverage ratios tend to indicate the company or stock have higher risk to shareholders.
+                    <br />
+                    JNJ performs best in share price also has a lowest debt leverage.
+                    <h4>
+                        WHAT TO EXPLORE NEXT?
+                    </h4>
+                    The details regarding the R&D expenses of each company for recent fiscal years are provided in the
+                    next slide.
+                    <br/>
+                    <br/>
+                    <span style="color: red;">click on the number if you want to go to the other slide page</span>
+                </div>
+            </div>
+            <div id="chart3" class="chart">
+                <svg></svg>
+                <div>
+                    <h4>
+                        WHAT DOES IT MEAN?
+                    </h4>
+                    The pharmaceutical sectors typically incur the highest degree of R&D expenses.
+                    <br/>
+                    All the companies are stably increasing their R&D expenses.
+                    <br/>
+                    Basically, each company has a turning point after 2020.
+                    <br/>
+                    JNJ performs best in share price also has a relatively high R&D input.
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const company = ["PFE", "MRK", "JNJ", "BMY"];
+        const color = d3.scaleOrdinal()
+            .domain(company)
+            .range(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']);
+        const width = 900, height = 500;
+        const margin = {
+            left: 40,
+            top: 30,
+            right: 20,
+            bottom: 30
+        }
+        // 初始化left 
+        document.querySelector("#wraps").style.left = 0;
+        // 上一页
+        function prev() {
+            let left = parseInt(document.querySelector("#wraps").style.left);
+            if (left >= 0) {
+                return
+            }
+            document.querySelectorAll(".page_number").forEach(d => d.className = "page_number");
+            document.querySelectorAll(".page_number")[-left / 900 - 1].className = "page_number now";
+            document.querySelector("#wraps").style.left = (left + 900) + "px";
+        }
+        // 下一页
+        function next() {
+            let left = parseInt(document.querySelector("#wraps").style.left);
+            if (left <= -1800) {
+                return
+            }
+            document.querySelectorAll(".page_number").forEach(d => d.className = "page_number");
+            document.querySelectorAll(".page_number")[-left / 900 + 1].className = "page_number now";
+            document.querySelector("#wraps").style.left = (left - 900) + "px";
+        }
+        function toPage(num) {
+            // 1 -> 0 
+            // 2 -> 1 * 900
+            document.querySelectorAll(".page_number").forEach(d => d.className = "page_number");
+            document.querySelectorAll(".page_number")[num - 1].className = "page_number now";
+            document.querySelector("#wraps").style.left = - (num - 1) * 900 + "px";
+        }
+        // 图1
+        d3.csv("price.csv").then(res => {
+            const svg = d3.select("#chart1")
+                .select("svg")
+                .attr("width", width)
+                .attr("height", height);
+            svg.append("text")
+                .text("Pharmaceuticals leading companies' stock price")
+                .attr("font-size", "22px")
+                .attr("x", (width - margin.right + margin.left) / 2)
+                .attr("text-anchor", "middle")
+                .attr("y", 25);
+            svg.append("g")
+                .attr("transform", "translate(0,40)")
+                .selectAll("path")
+                .data(company)
+                .enter()
+                .append("path")
+                .attr("d", (d, i) => `M50,${i * 15},L90,${i * 15}`)
+                .attr("fill", "none")
+                .attr("stroke", d => color(d))
+                .attr("stroke-width", 1.5);
+            svg.append("g")
+                .attr("font-size", "12px")
+                .attr("transform", "translate(90,40)")
+                .selectAll("text")
+                .data(company)
+                .enter()
+                .append("text")
+                .attr("x", 5)
+                .attr("y", (d, i) => i * 15 + 5)
+                .text(d => d)
+            let x = d3.scaleUtc()
+                .domain([new Date("01/03/2017"), new Date("12/31/2021")])
+                .range([margin.left, width - margin.right]);
+            let y = d3.scaleLinear()
+                .domain([0, 180])
+                .range([height - margin.bottom, margin.top]);
+            let line = d3.line()
+                .x(d => x(new Date(d.datadate)))
+                .y(d => y(d.prccd));
+            svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(25));
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+            svg.append("g")
+                .attr("text-anchor", "middle")
+                .attr("font-size", "12px")
+                .call(g => {
+                    g.append("text")
+                        .text("closing price")
+                        .attr("x", margin.left)
+                        .attr("y", margin.top - 12);
+                    g.append("text")
+                        .text("Date")
+                        .attr("x", width - margin.right)
+                        .attr("y", height)
+                })
+
+            let data = d3.group(res, d => d.tic);
+            let g = svg.append("g")
+            let tips = svg
+                .append("text")
+                .attr("font-size", "12px");
+            const formater = d3.timeFormat("%d-%b-%y")
+            company.forEach(key => {
+                let arr = data.get(key);
+                g.append("g")
+                    .append("path")
+                    .attr("d", line(arr))
+                    .attr("fill", "none")
+                    .attr("stroke", color(key))
+                    .attr("stroke-width", 1.5)
+                    .attr("style", "cursor:pointer")
+                    .on("mousemove", (e, d) => {
+                        let { offsetX, offsetY } = e;
+                        tips.attr("display", "block")
+                            .attr("x", offsetX + 10)
+                            .attr("y", offsetY + 20)
+                            .text(formater(x.invert(offsetX)) + " / " + y.invert(offsetY).toFixed(2))
+                    })
+                    .on("mouseleave", () => {
+                        tips.attr("display", "none")
+                    })
+            });
+            // annotations
+            const annotations = [{
+                note: {
+                    label: "companies have suffered massive price drops due to pandemic",
+                    bgPadding: 10,
+                    title: "03/23/2020",
+                    wrap: 190
+                },
+                //can use x, y directly instead of data
+                data: { datadate: "03/23/2020", prccd: 111.1400 },
+                dy: 0,
+                dx: -150
+            }, {
+                type: d3.annotationCalloutCircle,
+                note: {
+                    label: "Recovering from Covid-19’s impact",
+                    wrap: 190
+                },
+                x: 600,
+                y: 130,
+                dx: 100,
+                dy: 10,
+                subject: {
+                    radius: 40
+                }
+            }]
+            const timeFormat = d3.timeFormat("%d-%b-%y")
+            const makeAnnotations = d3.annotation()
+                .notePadding(15)
+                .type(d3.annotationCalloutElbow)
+                .accessors({
+                    x: d => x(new Date(d.datadate)),
+                    y: d => y(d.prccd)
+                })
+                .accessorsInverse({
+                    public_date: d => timeFormat(x.invert(d.x)),
+                    debt_capital: d => y.invert(d.y)
+                })
+                .annotations(annotations);
+            svg.append("g")
+                .attr("class", "annotation-group")
+                .call(makeAnnotations)
+        })
+        // 图2
+        d3.csv("debt.csv").then(res => {
+            let data = d3.group(res, d => d.TICKER);
+            const svg = d3.select("#chart2")
+                .select("svg")
+                .attr("width", width)
+                .attr("height", height);
+            svg.append("text")
+                .text("Pharmaceuticals leading companies' capital structures")
+                .attr("font-size", "22px")
+                .attr("x", width / 2)
+                .attr("text-anchor", "middle")
+                .attr("y", 25);
+            svg.append("g")
+                .attr("transform", "translate(0,40)")
+                .selectAll("path")
+                .data(company)
+                .enter()
+                .append("path")
+                .attr("d", (d, i) => `M50,${i * 15},L90,${i * 15}`)
+                .attr("fill", "none")
+                .attr("stroke", d => color(d))
+                .attr("stroke-width", 1.5);
+            svg.append("g")
+                .attr("font-size", "12px")
+                .attr("transform", "translate(90,40)")
+                .selectAll("text")
+                .data(company)
+                .enter()
+                .append("text")
+                .attr("x", 5)
+                .attr("y", (d, i) => i * 15 + 5)
+                .text(d => d);
+            let x = d3.scaleUtc()
+                .domain([new Date("01/31/2017"), new Date("12/31/2021")])
+                .range([margin.left, width - margin.right]);
+            let y = d3.scaleLinear()
+                .domain([0, d3.max(res, d => d.debt_capital)])
+                .range([height - margin.bottom, margin.top]);
+            let line = d3.line()
+                .x(d => x(new Date(d.public_date)))
+                .y(d => y(d.debt_capital));
+            svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(25));
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+            svg.append("g")
+                .attr("text-anchor", "middle")
+                .attr("font-size", "12px")
+                .call(g => {
+                    g.append("text")
+                        .text("Debt/Capital")
+                        .attr("x", margin.left)
+                        .attr("y", margin.top - 12);
+                    g.append("text")
+                        .text("Date")
+                        .attr("x", width - margin.right)
+                        .attr("y", height)
+                })
+            company.forEach(key => {
+                let arr = data.get(key);
+                svg.append("g")
+                    .append("path")
+                    .attr("d", line(arr))
+                    .attr("fill", "none")
+                    .attr("stroke", color(key))
+                    .attr("stroke-width", 1.5);
+            });
+            // annotations
+            const annotations = [{
+                type: d3.annotationCalloutElbow,
+                note: {
+                    title: "JNJ",
+                    label: "Lowest leverage compared with other three companies",
+                    wrap: 200
+                },
+                connector: {
+                    end: "arrow" // 'dot' also available
+                },
+                x: 600,
+                y: 200,
+                dx: 0,
+                dy: 50
+            }]
+            const makeAnnotations = d3.annotation()
+                .notePadding(15)
+                .annotations(annotations);
+            svg.append("g")
+                .attr("class", "annotation-group")
+                .call(makeAnnotations);
+        })
+        // 图3
+        d3.csv("R&D EXP.csv").then(res => {
+            let data = d3.group(res, d => d.tic);
+            const svg = d3.select("#chart3")
+                .select("svg")
+                .attr("width", width)
+                .attr("height", height);
+            svg.append("text")
+                .text("Pharmaceuticals leading companies' annual R&D expense")
+                .attr("font-size", "22px")
+                .attr("x", width / 2)
+                .attr("text-anchor", "middle")
+                .attr("y", 25);
+            svg.append("g")
+                .attr("transform", "translate(0,40)")
+                .selectAll("path")
+                .data(company)
+                .enter()
+                .append("path")
+                .attr("d", (d, i) => `M50,${i * 15},L90,${i * 15}`)
+                .attr("fill", "none")
+                .attr("stroke", d => color(d))
+                .attr("stroke-width", 1.5);
+            svg.append("g")
+                .attr("font-size", "12px")
+                .attr("transform", "translate(90,40)")
+                .selectAll("text")
+                .data(company)
+                .enter()
+                .append("text")
+                .attr("x", 5)
+                .attr("y", (d, i) => i * 15 + 5)
+                .text(d => d);
+            let x = d3.scaleUtc()
+                .domain([new Date("2017"), new Date("2021")])
+                .range([margin.left, width - margin.right]);
+            let y = d3.scaleLinear()
+                .domain([0, d3.max(res, d => Number(d.xrd))])
+                .range([height - margin.bottom, margin.top]);
+            let line = d3.line()
+                .x(d => x(new Date(d.fyear)))
+                .y(d => y(d.xrd));
+            svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(5));
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+            svg.append("g")
+                .attr("text-anchor", "middle")
+                .attr("font-size", "12px")
+                .call(g => {
+                    g.append("text")
+                        .text("R&D expense")
+                        .attr("x", margin.left)
+                        .attr("y", margin.top - 12);
+                    g.append("text")
+                        .text("Fiscal Year")
+                        .attr("x", width - margin.right - 12)
+                        .attr("y", height)
+                })
+            company.forEach(key => {
+                let arr = data.get(key);
+                svg.append("g")
+                    .append("path")
+                    .attr("d", line(arr))
+                    .attr("fill", "none")
+                    .attr("stroke", color(key))
+                    .attr("stroke-width", 1.5);
+            });
+            // annotations
+            const annotations = [{
+                type: d3.annotationCalloutCircle,
+                note: {
+                    label: "Trend of expanding research and development activities",
+                    wrap: 200
+                },
+                x: 680,
+                y: 150,
+                dx: 0,
+                dy: 220,
+                subject: {
+                    radius: 120
+                }
+            }]
+            const makeAnnotations = d3.annotation()
+                .notePadding(15)
+                .annotations(annotations);
+            svg.append("g")
+                .attr("class", "annotation-group")
+                .call(makeAnnotations);
+
+        })
+    </script>
+</body>
+
+</html>
